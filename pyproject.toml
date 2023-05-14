@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "fgo-drop-analyzer"
+version = "0.1.0"
+description = ""
+authors = ["fgophi <fgophi@gmail.com>"]
+readme = "README.md"
+packages = [{include = "fgo_drop_analyzer"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.29.0"
+pandas = "^2.0.1"
+openpyxl = "^3.1.2"
+jaconv = "^0.3.4"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.2.0"
+flake8 = "^6.0.0"
+black = "^23.3.0"
+pytest = "^7.3.1"
+pre-commit = "^3.3.1"
+pandas-stubs = "^2.0.1.230501"
+types-openpyxl = "^3.1.0.7"
+types-requests = "^2.30.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
