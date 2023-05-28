@@ -131,7 +131,8 @@ def remove_drop_up(df: pd.DataFrame) -> pd.DataFrame:
     # note列にパターンが含まれるかどうかをチェックする関数
     def check_pattern(row):
         note = jaconv.z2h(row["note"], kana=False, digit=True, ascii=True)
-        pattern = re.compile(rf'{row["object_name"]}泥UP\s*([0-9]+)\s*%')
+        object_name = re.escape(row["object_name"])
+        pattern = re.compile(rf"{object_name}泥UP\s*([0-9]+)\s*%")
         match = pattern.search(note)
         if match:
             number = re.sub(r"\s", "", match.group(1))
@@ -248,7 +249,7 @@ def normalize_item(df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.DataFrame
     df = df[df["num"] != -1]
 
     # "id" 列の値の先頭に URL を追加する
-    df["url"] = "http://localhost:3000/reports/" + df["id"]
+    df["url"] = "https://fgodrop.max747.org/reports/" + df["id"]
 
     # timestampを日付に変換
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s")
