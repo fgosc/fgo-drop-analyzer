@@ -1,8 +1,6 @@
 certifi==2022.12.7
 charset-normalizer==3.1.0
 et-xmlfile==1.1.0
-# Editable install with no version control (fgo-drop-analyzer==0.1.0)
--e c:\users\fgoph\fgosc\fgo-drop-analyzer
 idna==3.4
 jaconv==0.3.4
 numpy==1.24.3
