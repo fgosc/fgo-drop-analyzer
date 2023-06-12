@@ -14,15 +14,12 @@ def prepare_data(reports_df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.Dat
     Returns:
         pd.DataFrame: マージされたデータ
     """
+    # "category"が"Error"の行を除外
+    reports_df = reports_df[reports_df["category"] != "Error"]
+
     reports_df_pivot = reports_df.pivot_table(
         index=[
             "id",
-            "owner",
-            "name",
-            "twitter_id",
-            "twitter_name",
-            "twitter_username",
-            "timestamp",
             "runs",
             "note",
             "quest_name",
@@ -123,7 +120,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
     """
     merged_df = prepare_data(reports_df, freequest_df)
 
-    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部"]
+    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部", "奏章"]
     # カテゴリごとに処理
     for category_name in order:
         group = freequest_df[freequest_df["category"] == category_name]
@@ -230,16 +227,13 @@ def append_rows_to_sheet(ws: Worksheet, df: pd.DataFrame) -> None:
 
 
 def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
-    """報告シートを出力する
+    """各カテゴリの報告シートを出力する
 
     Args:
         wb (Workbook): 出力するワークブック
         reports_df (pd.DataFrame): 報告データ
     """
-    ws = wb.create_sheet(title="全データ")
-    append_rows_to_sheet(ws, reports_df)
-
-    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部", "その他クエスト"]
+    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部", "奏章", "その他クエスト", "Error"]
 
     # データフレームを 'category' でグループ化
     grouped_reports = reports_df.groupby("category")

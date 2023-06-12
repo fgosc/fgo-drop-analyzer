@@ -9,10 +9,14 @@ from typing import Tuple
 import pandas as pd
 from openpyxl import Workbook
 
+from .create_report import append_rows_to_sheet
 from .create_report import create_list
 from .create_report import create_statics
 from .data_classifier import classify_dataframe
+from .data_classifier import modify_war_and_quest_columns
+from .data_cleaning import check_nonexistent_items
 from .data_cleaning import normalize_item
+from .data_cleaning import validate_drop_rates
 from .data_fetcher import fetch_reports
 
 logger = logging.getLogger(__name__)
@@ -108,12 +112,18 @@ def main():
         if reports_df.empty:
             logger.info("新規データがありません")
             sys.exit()
+        reports_df = modify_war_and_quest_columns(reports_df)
         reports_df = classify_dataframe(reports_df)
         # 処理する前に最新の unixtime を取得
         latest_unixtime = reports_df["timestamp"].max()
 
         reports_df = normalize_item(reports_df, freequest_df)
 
+        ws = wb.create_sheet(title="全データ")
+        append_rows_to_sheet(ws, reports_df)
+
+        reports_df = validate_drop_rates(reports_df)
+        reports_df = check_nonexistent_items(reports_df, freequest_df)
         create_list(wb, reports_df)
         create_statics(wb, reports_df, freequest_df)
 

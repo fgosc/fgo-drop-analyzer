@@ -8,6 +8,11 @@ import jaconv  # type: ignore
 import pandas as pd
 
 base_dir = Path(__file__).resolve().parents[1]
+regex_patterns = [
+    r"(剣|弓|槍|騎|術|殺|狂)(輝|魔)",
+    r"(剣|弓|槍|騎|術|殺|狂)(灯火|大火|猛火|業火)",
+    r"(剣|弓|槍|騎|術|殺|狂)(モ|ピ)",
+]
 
 
 def validate_drop_rates(reports_df: pd.DataFrame) -> pd.DataFrame:
@@ -36,6 +41,9 @@ def validate_drop_rates(reports_df: pd.DataFrame) -> pd.DataFrame:
 
     # 'object_name'が辞書のキーに一致する行に対して前処理を適用
     for idx, row in reports_df.iterrows():
+        if any(re.match(pattern, row["object_name"]) for pattern in regex_patterns):
+            continue
+
         if row["object_name"] in rarity_dict:
             rarity = rarity_dict[row["object_name"]]
             if row["category"] != "その他イベント":
@@ -254,8 +262,6 @@ def normalize_item(df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.DataFrame
     # timestampを日付に変換
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s")
 
-    df = validate_drop_rates(df)
-    df = check_nonexistent_items(df, freequest_df)
     # タイムスタンプで降順ソート
     df = df.sort_values(by="timestamp", ascending=False)
 
