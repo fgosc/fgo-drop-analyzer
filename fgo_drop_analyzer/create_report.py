@@ -18,13 +18,7 @@ def prepare_data(reports_df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.Dat
     reports_df = reports_df[reports_df["category"] != "Error"]
 
     reports_df_pivot = reports_df.pivot_table(
-        index=[
-            "id",
-            "runs",
-            "note",
-            "quest_name",
-            "url",
-        ],
+        index=["id", "runs", "note", "quest_name", "url", "timestamp"],
         columns="object_name",
         values="num",
         fill_value=None,
@@ -93,7 +87,7 @@ def write_to_sheet(
         ws.append([war_name])
 
     ws.append([None, quest_name])
-    ws.append([None] + ["No."] + [None, None] + list(range(1, len(output_df.columns))))
+    ws.append([None] + ["No."])
 
     for data_row in output_df.values:
         ws.append([None] + data_row.tolist()[:1] + [None, None] + data_row.tolist()[1:])
