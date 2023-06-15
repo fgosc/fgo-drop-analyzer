@@ -38,6 +38,9 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
     Returns:
         pd.DataFrame: 整形されたデータ
     """
+    # ソート操作を追加。timestamp列に基づいて昇順にソート
+    group = group.sort_values(by="timestamp")
+
     columns_after_item12 = group.columns.tolist()[
         group.columns.tolist().index("item12") + 1
     ]
