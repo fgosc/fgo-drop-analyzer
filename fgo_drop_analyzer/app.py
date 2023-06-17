@@ -86,9 +86,21 @@ def prepare_dataframe() -> pd.DataFrame:
     freequest_df = pd.read_csv(
         base_dir / "data" / "freequest.csv", encoding="utf-8-sig"
     )
-    # 重複するspotがある場合、quest_nameをspotに上書きする
     freequest_df.loc[
-        freequest_df["spot"].duplicated(keep=False), "spot"
+        (freequest_df["war_name"] == "オケアノス")
+        & (freequest_df["spot"] == "群島")
+        & (freequest_df["quest_name"] == "隠された島"),
+        "spot",
+    ] = "隠された島"
+    freequest_df.loc[
+        (freequest_df["war_name"] == "下総国")
+        & (freequest_df["spot"] == "裏山")
+        & (freequest_df["quest_name"] == "戦戦恐恐"),
+        "spot",
+    ] = "戦戦恐恐"
+    freequest_df.loc[
+        (freequest_df["spot"] == "カルデアゲート"),
+        "spot",
     ] = freequest_df["quest_name"]
     # quest_name列を削除し、spot列の名前をquest_nameに変更
     freequest_df.drop("quest_name", axis=1, inplace=True)
