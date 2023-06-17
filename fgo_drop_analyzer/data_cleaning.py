@@ -1,5 +1,6 @@
 import csv
 import re
+import unicodedata
 from pathlib import Path
 from typing import Callable
 from typing import Dict
@@ -216,6 +217,9 @@ def create_item_normalizer() -> Callable[[str], str]:
     item_dict = read_item_csv(base_dir / "data" / "item.csv")
 
     def normalize_item_name(item_name: str) -> str:
+        # item_name に含まれる半角カナを全角カナに変換
+        item_name = unicodedata.normalize("NFKC", item_name)
+
         for key, value in item_dict.items():
             if re.fullmatch(key, item_name):  # 正規表現でマッチするか確認
                 return value
