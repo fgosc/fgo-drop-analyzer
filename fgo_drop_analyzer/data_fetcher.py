@@ -28,8 +28,8 @@ def fetch_reports(timestamp: int) -> pd.DataFrame:
         pd.DataFrame: 取得されたデータ
     """
     query = """
-    query ListReports($nextToken: String, $timestamp: Int) {
-        listReports(filter: {timestamp: {gt: $timestamp}}, nextToken: $nextToken) {
+    query ListReportsSortedByTimestamp($type: String!, $nextToken: String, $timestamp: ModelIntKeyConditionInput) {
+        listReportsSortedByTimestamp(type: $type, timestamp: $timestamp, nextToken: $nextToken) {
             items {
                 id
                 owner
@@ -66,7 +66,11 @@ def fetch_reports(timestamp: int) -> pd.DataFrame:
             GRAPHQL_ENDPOINT,
             json={
                 "query": query,
-                "variables": {"nextToken": next_token, "timestamp": timestamp},
+                "variables": {
+                    "type": "open",
+                    "nextToken": next_token,
+                    "timestamp": {"gt": timestamp},
+                },
             },
             headers=headers,
         )
@@ -75,8 +79,8 @@ def fetch_reports(timestamp: int) -> pd.DataFrame:
             raise ValueError(f"Failed to fetch data from AppSync: {response.text}")
 
         response_data = json.loads(response.text)
-        report_items = response_data["data"]["listReports"]["items"]
-        next_token = response_data["data"]["listReports"]["nextToken"]
+        report_items = response_data["data"]["listReportsSortedByTimestamp"]["items"]
+        next_token = response_data["data"]["listReportsSortedByTimestamp"]["nextToken"]
 
         for item in report_items:
             for drop_obj in item["dropObjects"]:
