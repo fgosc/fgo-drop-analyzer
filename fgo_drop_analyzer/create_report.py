@@ -41,12 +41,12 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
     # ソート操作を追加。timestamp列に基づいて昇順にソート
     group = group.sort_values(by="timestamp")
 
-    columns_after_item12 = group.columns.tolist()[
-        group.columns.tolist().index("item12") + 1
+    columns_after_item13 = group.columns.tolist()[
+        group.columns.tolist().index("item13") + 1
     ]
     output_columns = ["url", "timestamp", "runs"] + list(item_columns)
 
-    if group[columns_after_item12].isnull().all().all():
+    if group[columns_after_item13].isnull().all().all():
         output_df = pd.DataFrame(columns=output_columns)
     else:
         output_df = group.drop(["id", "category", "war_name"], axis=1).reset_index(
@@ -146,6 +146,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
                     "item10",
                     "item11",
                     "item12",
+                    "item13",
                 ],
             ].values.ravel()
             item_columns = item_columns[~pd.isnull(item_columns)]
