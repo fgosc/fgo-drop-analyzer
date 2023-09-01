@@ -12,7 +12,7 @@ FGO-Drop-Reporter のデータベースからデータを集め FGO アイテム
 
 ```
 cd fgo-drop-analyzer
-pip install -r requerements.txt
+pip install -r requirements.txt
 cd conf
 copy config-dist.ini config.ini
 ```
