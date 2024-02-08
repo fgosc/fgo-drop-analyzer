@@ -99,6 +99,18 @@ def prepare_dataframe() -> pd.DataFrame:
         "spot",
     ] = "戦戦恐恐"
     freequest_df.loc[
+        (freequest_df["war_name"] == "オーディール・コール")
+        & (freequest_df["spot"] == "北大西洋エリア")
+        & (freequest_df["quest_name"] == "光糸導く迷宮"),
+        "spot",
+    ] = "光糸導く迷宮"
+    freequest_df.loc[
+        (freequest_df["war_name"] == "オーディール・コール")
+        & (freequest_df["spot"] == "北大西洋エリア")
+        & (freequest_df["quest_name"] == "久遠の微笑"),
+        "spot",
+    ] = "久遠の微笑"
+    freequest_df.loc[
         (freequest_df["spot"] == "カルデアゲート"),
         "spot",
     ] = freequest_df["quest_name"]
