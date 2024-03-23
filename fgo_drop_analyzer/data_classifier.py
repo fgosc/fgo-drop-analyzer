@@ -26,7 +26,7 @@ def classify_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             "トラオム",
             "ナウイ・ミクトラン",
         ],
-        "奏章": ["オーディール・コール", "ペーパームーン"],
+        "奏章": ["オーディール・コール", "ペーパームーン", "イド"],
     }
 
     training_quests = [

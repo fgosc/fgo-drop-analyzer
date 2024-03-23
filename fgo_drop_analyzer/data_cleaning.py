@@ -99,14 +99,17 @@ def check_nonexistent_items(
     # 対象のcategoryの行のみを取り出します
     target_reports_df = reports_df[reports_df["category"].isin(target_categories)]
 
-    # 各クエスト名に対するアイテムリストを生成します
+    # war_nameとquest_nameを結合してuniqueなquest identifierを作成
+    freequest_df['unique_quest_name'] = freequest_df['war_name'] + ":" + freequest_df['quest_name']
+
+    # unique_quest_nameをインデックスとして設定し、アイテムに関するカラムのみを抽出して辞書に変換
     quest_items_dict = (
-        freequest_df.set_index("quest_name").filter(like="item").to_dict("index")
+        freequest_df.set_index('unique_quest_name').filter(like="item").to_dict("index")
     )
 
     # 対象の行を順に処理します
     for idx, row in target_reports_df.iterrows():
-        quest_name = row["quest_name"]
+        unique_quest_name = row["war_name"] + ":" + row["quest_name"]
         object_name = row["object_name"]
 
         # QPと星1-3種火は除外
@@ -117,8 +120,8 @@ def check_nonexistent_items(
 
         # quest_nameがfreequest_dfに存在し、かつ、object_nameがそのクエストのアイテムリストにない場合
         if (
-            quest_name in quest_items_dict
-            and object_name not in quest_items_dict[quest_name].values()
+            unique_quest_name in quest_items_dict
+            and object_name not in quest_items_dict[unique_quest_name].values()
         ):
             # object_nameを "[E: 非存在]" + object_nameに変更します
             reports_df.loc[idx, "object_name"] = "[E: 非存在]" + object_name  # type: ignore

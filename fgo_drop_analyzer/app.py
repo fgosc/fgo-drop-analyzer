@@ -114,6 +114,30 @@ def prepare_dataframe() -> pd.DataFrame:
         (freequest_df["spot"] == "カルデアゲート"),
         "spot",
     ] = freequest_df["quest_name"]
+    freequest_df.loc[
+        (freequest_df["war_name"] == "イド")
+        & (freequest_df["spot"] == "西新宿")
+        & (freequest_df["quest_name"] == "たたずむ摩天楼"),
+        "spot",
+    ] = "たたずむ摩天楼"
+    freequest_df.loc[
+        (freequest_df["war_name"] == "イド")
+        & (freequest_df["spot"] == "学校")
+        & (freequest_df["quest_name"] == "ななふしぎ調査"),
+        "spot",
+    ] = "ななふしぎ調査"
+    freequest_df.loc[
+        (freequest_df["war_name"] == "イド")
+        & (freequest_df["spot"] == "学校")
+        & (freequest_df["quest_name"] == "いのこり特訓"),
+        "spot",
+    ] = "いのこり特訓"
+    freequest_df.loc[
+        (freequest_df["war_name"] == "イド")
+        & (freequest_df["spot"] == "学校")
+        & (freequest_df["quest_name"] == "とつぜんの呼び出し"),
+        "spot",
+    ] = "とつぜんの呼び出し"
     # quest_name列を削除し、spot列の名前をquest_nameに変更
     freequest_df.drop("quest_name", axis=1, inplace=True)
     freequest_df.rename(columns={"spot": "quest_name"}, inplace=True)

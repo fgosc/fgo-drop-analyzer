@@ -100,7 +100,7 @@ def write_to_sheet(
         elif data_row.tolist()[0] == "ソース":
             for cell in ws[ws.max_row][4:]:
                 if cell.value is not None:
-                    cell.hyperlink = cell.value  # type: ignore
+                    cell.hyperlink = str(cell.value)  # type: ignore
 
     ws.append([])
     ws.append([])
