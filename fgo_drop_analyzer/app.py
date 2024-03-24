@@ -77,6 +77,15 @@ def prepare_workbook() -> Workbook:
     return wb
 
 
+def update_spot(row):
+    if row["category"] in ["フリクエ1部", "フリクエ1.5部", "フリクエ2部", "カルデアゲート"]:
+        return row["spot"]
+    elif row["category"] == "奏章" and row["war_name"] in ["オーディール・コール", "ペーパームーン"]:
+        return row["spot"]
+    else:
+        return row["quest_name"]
+
+
 def prepare_dataframe() -> pd.DataFrame:
     """フリーククエストデータの準備
 
@@ -114,34 +123,7 @@ def prepare_dataframe() -> pd.DataFrame:
         (freequest_df["spot"] == "カルデアゲート"),
         "spot",
     ] = freequest_df["quest_name"]
-    freequest_df.loc[
-        (freequest_df["war_name"] == "イド")
-        & (freequest_df["spot"] == "西新宿")
-        & (freequest_df["quest_name"] == "たたずむ摩天楼"),
-        "spot",
-    ] = "たたずむ摩天楼"
-    freequest_df.loc[
-        (freequest_df["war_name"] == "イド")
-        & (freequest_df["spot"] == "学校")
-        & (freequest_df["quest_name"] == "ななふしぎ調査"),
-        "spot",
-    ] = "ななふしぎ調査"
-    freequest_df.loc[
-        (freequest_df["war_name"] == "イド")
-        & (freequest_df["spot"] == "学校")
-        & (freequest_df["quest_name"] == "いのこり特訓"),
-        "spot",
-    ] = "いのこり特訓"
-    freequest_df.loc[
-        (freequest_df["war_name"] == "イド")
-        & (freequest_df["spot"] == "学校")
-        & (freequest_df["quest_name"] == "とつぜんの呼び出し"),
-        "spot",
-    ] = "とつぜんの呼び出し"
-    # quest_name列を削除し、spot列の名前をquest_nameに変更
-    freequest_df.drop("quest_name", axis=1, inplace=True)
-    freequest_df.rename(columns={"spot": "quest_name"}, inplace=True)
-    # 不要な 'Unnamed: 数字' カラムを削除
+    freequest_df["quest_name"] = freequest_df.apply(update_spot, axis=1)
     freequest_df = freequest_df.loc[:, ~freequest_df.columns.str.contains("^Unnamed")]
     return freequest_df
 

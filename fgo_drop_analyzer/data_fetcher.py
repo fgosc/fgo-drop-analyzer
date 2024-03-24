@@ -15,6 +15,25 @@ API_KEY = config.get("appsync", "api_key")
 GRAPHQL_ENDPOINT = config.get("appsync", "graphql_endpoint")
 
 
+def replace_quest_name(df):
+    # 変換ルールを辞書として定義
+    conversion_dict = {
+        "繁華街": "かいもの帰り",
+        "自宅": "ないしょの待ち合わせ",
+        "学校": "しずかな放課後",
+        "通学路": "いつもの通い道",
+        "東京駅": "たびだちの駅",
+        "西新宿": "であいの交差点",
+        "お台場": "あいにくの空模様",
+        "新宿御苑": "バードウォッチング"
+    }
+
+    # warNameが"イド"で、questNameが変換ルールに含まれる行のみを対象にする
+    mask = (df['war_name'] == 'イド') & (df['quest_name'].isin(conversion_dict.keys()))
+    df.loc[mask, 'quest_name'] = df.loc[mask, 'quest_name'].map(conversion_dict)
+    return df
+
+
 def fetch_reports(timestamp: int) -> pd.DataFrame:
     """GraphQLを使用してデータベースからデータを取得する
 
@@ -109,5 +128,6 @@ def fetch_reports(timestamp: int) -> pd.DataFrame:
             break
 
     df_reports = pd.DataFrame(reports)
+    df_reports = replace_quest_name(df_reports)
 
     return df_reports
