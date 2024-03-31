@@ -100,11 +100,13 @@ def check_nonexistent_items(
     target_reports_df = reports_df[reports_df["category"].isin(target_categories)]
 
     # war_nameとquest_nameを結合してuniqueなquest identifierを作成
-    freequest_df['unique_quest_name'] = freequest_df['war_name'] + ":" + freequest_df['quest_name']
+    freequest_df["unique_quest_name"] = (
+        freequest_df["war_name"] + ":" + freequest_df["quest_name"]
+    )
 
     # unique_quest_nameをインデックスとして設定し、アイテムに関するカラムのみを抽出して辞書に変換
     quest_items_dict = (
-        freequest_df.set_index('unique_quest_name').filter(like="item").to_dict("index")
+        freequest_df.set_index("unique_quest_name").filter(like="item").to_dict("index")
     )
 
     # 対象の行を順に処理します
@@ -274,5 +276,49 @@ def normalize_item(df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.DataFrame
 
     # タイムスタンプで降順ソート
     df = df.sort_values(by="timestamp", ascending=False)
+
+    return df
+
+
+def normalize_quest(df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.DataFrame:
+    """指定された条件に基づいてdfのquest_name、categoryを更新し、
+    特定のパターンに一致するquest_nameに対してcategoryを'修練場'に設定し、
+    最終的にcategoryが決まらない場合は'その他クエスト'と設定する。
+
+    Args:
+        df (pd.DataFrame): 入力データ
+        freequest_df (pd.DataFrame): フリクエデータ
+
+    Returns:
+        pd.DataFrame: 更新されたデータフレーム
+    """
+    # 正規表現パターンの定義
+    pattern = re.compile(r"(剣|弓|槍|騎|術|殺|狂)の修練場 (初|中|上|超|極)級")
+
+    # dfをループして行ごとに処理
+    for index, row in df.iterrows():
+        # categoryが最終的に決まらなかった場合のデフォルト値を設定
+        df.at[index, "category"] = "その他クエスト"
+
+        # quest_nameが正規表現に一致する場合、categoryを'修練場'に設定し、ループから抜ける
+        if pattern.match(row["quest_name"]):
+            df.at[index, "category"] = "修練場"
+            continue  # 一致したらループを抜ける
+
+        # freequest_dfの対応する行を探す
+        matching_rows = freequest_df[freequest_df["war_name"] == row["war_name"]]
+
+        for _, freequest_row in matching_rows.iterrows():
+            # quest_nameが一致する場合
+            if row["quest_name"] == freequest_row["quest_name"]:
+                df.at[index, "quest_name"] = freequest_row["counter_name"]
+                df.at[index, "category"] = freequest_row["category"]
+                break  # 一致したらループを抜ける
+
+            # quest_nameが一致しないが、spotが一致する場合
+            elif row["quest_name"] == freequest_row["spot"]:
+                df.at[index, "quest_name"] = freequest_row["counter_name"]
+                df.at[index, "category"] = freequest_row["category"]
+                break  # 一致したらループを抜ける
 
     return df

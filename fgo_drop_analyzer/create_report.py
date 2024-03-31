@@ -18,13 +18,17 @@ def prepare_data(reports_df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.Dat
     reports_df = reports_df[reports_df["category"] != "Error"]
 
     reports_df_pivot = reports_df.pivot_table(
-        index=["id", "runs", "note", "quest_name", "url", "timestamp"],
+        index=["id", "runs", "note", "war_name", "quest_name", "url", "timestamp"],
         columns="object_name",
         values="num",
         fill_value=None,
     ).reset_index()
 
-    merged_df = freequest_df.merge(reports_df_pivot, on="quest_name", how="outer")
+    # freequest_dfの"quest_name"を"counter_name"の値で置き換え
+    freequest_df["quest_name"] = freequest_df["counter_name"]
+    merged_df = freequest_df.merge(
+        reports_df_pivot, on=["war_name", "quest_name"], how="outer"
+    )
     return merged_df
 
 
@@ -126,7 +130,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
         # 前回のwar_nameを記憶する変数
         previous_war_name = ""
         for _, row in group.iterrows():
-            quest_name = row["quest_name"]
+            quest_name = row["counter_name"]
             war_name = row["war_name"]
 
             group = merged_df[merged_df["quest_name"] == quest_name]
@@ -231,7 +235,15 @@ def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
         wb (Workbook): 出力するワークブック
         reports_df (pd.DataFrame): 報告データ
     """
-    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部", "奏章", "その他クエスト", "Error"]
+    order = [
+        "修練場",
+        "フリクエ1部",
+        "フリクエ1.5部",
+        "フリクエ2部",
+        "奏章",
+        "その他クエスト",
+        "Error",
+    ]
 
     # データフレームを 'category' でグループ化
     grouped_reports = reports_df.groupby("category")
@@ -241,7 +253,9 @@ def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
         if category in grouped_reports.groups:
             category_group_df = grouped_reports.get_group(category)
         else:
-            category_group_df = pd.DataFrame()  # データが存在しない場合、空のデータフレームを作成
+            category_group_df = (
+                pd.DataFrame()
+            )  # データが存在しない場合、空のデータフレームを作成
 
         ws = wb.create_sheet(title=category)
 
