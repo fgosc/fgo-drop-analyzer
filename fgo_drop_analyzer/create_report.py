@@ -111,6 +111,92 @@ def write_to_sheet(
     return war_name  # war_nameを更新
 
 
+def aggregate_items_by_object(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    DataFrameを入力として受け取り、特定のカラムとobject_nameでグループ化し、
+    numとstackの乗算の合計を計算して集計する関数。
+
+    Args:
+        df: 入力Pandas DataFrame。以下のカラムを含み、numとstackがint型であることを期待します。
+            id, owner, name, twitter_id, twitter_name, twitter_username,
+            report_type, war_name, quest_type, quest_name, timestamp,
+            runs, note, object_name, num, stack, category, url
+
+    Returns:
+        集計済みのPandas DataFrame。object_nameごとにnum * stackの合計が
+        計算され、stackは1に設定されます。元のDataFrameと同じカラム構成と順序になります。
+    """
+    # 入力DataFrameのコピーを作成し、元のDataFrameを変更しないようにする
+    df_processed = df.copy()
+
+    # numとstackの乗算結果を計算する一時カラムを作成
+    # numとstackがint型であることを前提としていますが、乗算結果や合計は大きくなる可能性があるので、
+    # Pandasに適切な型を推論させます。
+    df_processed["_num_stack_product"] = df_processed["num"] * df_processed["stack"]
+
+    # グループ化に使用するカラムリストを定義
+    # object_nameもグループ化キーに含めます
+    group_cols = [
+        "id",
+        "owner",
+        "name",
+        "twitter_id",
+        "twitter_name",
+        "twitter_username",
+        "report_type",
+        "war_name",
+        "quest_type",
+        "quest_name",
+        "timestamp",
+        "runs",
+        "note",
+        "category",
+        "url",
+        "object_name",
+    ]
+
+    # 指定されたカラムとobject_nameでグループ化し、_num_stack_productの合計を計算
+    # aggメソッドを使用して集計し、結果のカラム名を'num'とする
+    aggregated_df = (
+        df_processed.groupby(group_cols)
+        .agg(num=("_num_stack_product", "sum"))
+        .reset_index()
+    )  # グループ化キーをカラムに戻す
+
+    # 集計後のDataFrameにstackカラムを追加し、すべての値を1に設定
+    aggregated_df["stack"] = 1
+
+    # 元のDataFrameの順序に合わせてカラムを並べ替える
+    # 必要なカラムリストを定義
+    output_cols = [
+        "id",
+        "owner",
+        "name",
+        "twitter_id",
+        "twitter_name",
+        "twitter_username",
+        "report_type",
+        "war_name",
+        "quest_type",
+        "quest_name",
+        "timestamp",
+        "runs",
+        "note",
+        "object_name",
+        "num",
+        "stack",
+        "category",
+        "url",
+    ]
+
+    # 並べ替えたDataFrameを作成
+    # aggの結果のカラム順序は group_cols + ['num', 'stack'] のようになっているため、
+    # output_colsリストを使って明示的にカラムを選択し、順序を調整します。
+    result_df = aggregated_df[output_cols]
+
+    return result_df
+
+
 def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.DataFrame):
     """統計シートを出力する
 
@@ -119,9 +205,17 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
         reports_df (pd.DataFrame): 報告データ
         freequest_df (pd.DataFrame): フリークエストに関するデータ
     """
-    merged_df = prepare_data(reports_df, freequest_df)
+    new_report_df = aggregate_items_by_object(reports_df)
+    merged_df = prepare_data(new_report_df, freequest_df)
 
-    order = ["修練場", "フリクエ1部", "フリクエ1.5部", "フリクエ2部", "奏章"]
+    order = [
+        "修練場",
+        "フリクエ1部",
+        "フリクエ1.5部",
+        "フリクエ2部",
+        "奏章",
+        "冠位戴冠戦",
+    ]
     # カテゴリごとに処理
     for category_name in order:
         group = freequest_df[freequest_df["category"] == category_name]
@@ -151,6 +245,11 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
                     "item11",
                     "item12",
                     "item13",
+                    "item14",
+                    "item15",
+                    "item16",
+                    "item17",
+                    "item18",
                 ],
             ].values.ravel()
             item_columns = item_columns[~pd.isnull(item_columns)]
@@ -241,6 +340,7 @@ def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
         "フリクエ1.5部",
         "フリクエ2部",
         "奏章",
+        "冠位戴冠戦",
         "その他クエスト",
         "Error",
     ]

@@ -48,7 +48,7 @@ def validate_drop_rates(reports_df: pd.DataFrame) -> pd.DataFrame:
         if row["object_name"] in rarity_dict:
             rarity = rarity_dict[row["object_name"]]
             if (
-                row["category"] not in ["修練場", "その他クエスト"]
+                row["category"] not in ["修練場", "冠位戴冠戦", "その他クエスト"]
                 and row["war_name"] != "オーディール・コール"
             ):
                 if (

@@ -163,5 +163,6 @@ cython_debug/
 
 # Data
 *.xlsx
+.csv
 
-conf/config.ini
+conf/*.ini
