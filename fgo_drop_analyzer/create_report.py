@@ -46,7 +46,7 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
     group = group.sort_values(by="timestamp")
 
     columns_after_item13 = group.columns.tolist()[
-        group.columns.tolist().index("item18") + 1
+        group.columns.tolist().index("item19") + 1
     ]
     output_columns = ["url", "timestamp", "runs"] + list(item_columns)
 
@@ -250,6 +250,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
                     "item16",
                     "item17",
                     "item18",
+                    "item19",
                 ],
             ].values.ravel()
             item_columns = item_columns[~pd.isnull(item_columns)]
