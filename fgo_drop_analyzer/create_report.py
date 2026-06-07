@@ -13,6 +13,7 @@ def prepare_data(reports_df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.Dat
 
     Returns:
         pd.DataFrame: マージされたデータ
+
     """
     # "category"が"Error"の行を除外
     reports_df = reports_df[reports_df["category"] != "Error"]
@@ -27,7 +28,9 @@ def prepare_data(reports_df: pd.DataFrame, freequest_df: pd.DataFrame) -> pd.Dat
     # freequest_dfの"quest_name"を"counter_name"の値で置き換え
     freequest_df["quest_name"] = freequest_df["counter_name"]
     merged_df = freequest_df.merge(
-        reports_df_pivot, on=["war_name", "quest_name"], how="outer"
+        reports_df_pivot,
+        on=["war_name", "quest_name"],
+        how="outer",
     )
     return merged_df
 
@@ -41,6 +44,7 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
 
     Returns:
         pd.DataFrame: 整形されたデータ
+
     """
     # ソート操作を追加。timestamp列に基づいて昇順にソート
     group = group.sort_values(by="timestamp")
@@ -54,7 +58,7 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
         output_df = pd.DataFrame(columns=output_columns)
     else:
         output_df = group.drop(["id", "category", "war_name"], axis=1).reset_index(
-            drop=True
+            drop=True,
         )
 
     for col in output_columns:
@@ -63,7 +67,7 @@ def create_output_df(group: pd.DataFrame, item_columns: np.ndarray) -> pd.DataFr
 
     output_df = output_df[output_columns[2:] + ["url", "timestamp"]]
     output_df = output_df.rename(
-        columns={"url": "ソース", "timestamp": "メモ", "runs": "周回数"}
+        columns={"url": "ソース", "timestamp": "メモ", "runs": "周回数"},
     )
     output_df = output_df.T
     output_df.reset_index(inplace=True)
@@ -89,6 +93,7 @@ def write_to_sheet(
 
     Returns:
         str: _description_
+
     """
     if war_name != previous_war_name:
         ws.append([war_name])
@@ -112,8 +117,7 @@ def write_to_sheet(
 
 
 def aggregate_items_by_object(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    DataFrameを入力として受け取り、特定のカラムとobject_nameでグループ化し、
+    """DataFrameを入力として受け取り、特定のカラムとobject_nameでグループ化し、
     numとstackの乗算の合計を計算して集計する関数。
 
     Args:
@@ -125,6 +129,7 @@ def aggregate_items_by_object(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         集計済みのPandas DataFrame。object_nameごとにnum * stackの合計が
         計算され、stackは1に設定されます。元のDataFrameと同じカラム構成と順序になります。
+
     """
     # 入力DataFrameのコピーを作成し、元のDataFrameを変更しないようにする
     df_processed = df.copy()
@@ -204,6 +209,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
         wb (Workbook): 出力するワークブック
         reports_df (pd.DataFrame): 報告データ
         freequest_df (pd.DataFrame): フリークエストに関するデータ
+
     """
     new_report_df = aggregate_items_by_object(reports_df)
     merged_df = prepare_data(new_report_df, freequest_df)
@@ -215,6 +221,7 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
         "フリクエ2部",
         "奏章",
         "冠位戴冠戦",
+        "アフタータイム",
     ]
     # カテゴリごとに処理
     for category_name in order:
@@ -271,7 +278,11 @@ def create_statics(wb: Workbook, reports_df: pd.DataFrame, freequest_df: pd.Data
             item_columns = item_columns[~pd.isnull(item_columns)]
             output_df = create_output_df(group, item_columns)
             previous_war_name = write_to_sheet(
-                ws, output_df, war_name, quest_name, previous_war_name
+                ws,
+                output_df,
+                war_name,
+                quest_name,
+                previous_war_name,
             )
 
 
@@ -281,6 +292,7 @@ def append_rows_to_sheet(ws: Worksheet, df: pd.DataFrame) -> None:
     Args:
         ws (Worksheet): 出力するワークブックシート
         df (pd.DataFrame): 使用するデータフレーム
+
     """
     # ヘッダーを追加
     headers = [
@@ -308,7 +320,9 @@ def append_rows_to_sheet(ws: Worksheet, df: pd.DataFrame) -> None:
     for idx, row in id_group_df.iterrows():
         new_row = []
         for object_name, num, stack in zip(
-            row["object_name"], row["num"], row["stack"]
+            row["object_name"],
+            row["num"],
+            row["stack"],
         ):
             if stack == 1:
                 new_row.extend([object_name, num])
@@ -335,7 +349,7 @@ def append_rows_to_sheet(ws: Worksheet, df: pd.DataFrame) -> None:
                 "war_name",
                 "quest_name",
                 "runs",
-            ]
+            ],
         ):
             new_row.insert(0, row[col][0])
 
@@ -349,6 +363,7 @@ def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
     Args:
         wb (Workbook): 出力するワークブック
         reports_df (pd.DataFrame): 報告データ
+
     """
     order = [
         "修練場",
@@ -357,6 +372,7 @@ def create_list(wb: Workbook, reports_df: pd.DataFrame) -> None:
         "フリクエ2部",
         "奏章",
         "冠位戴冠戦",
+        "アフタータイム",
         "その他クエスト",
         "Error",
     ]
